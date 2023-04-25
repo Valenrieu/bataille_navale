@@ -49,7 +49,6 @@ def initGridComp():
 
         if validPosition(gridComp, l, c, d, ships_len[0]):
             set_ships(gridComp, l, c, d, ships_len[0], code[0])
-
             del ships_len[0]
             del code[0]
 
