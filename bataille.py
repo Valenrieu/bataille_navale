@@ -91,11 +91,11 @@ def initGridPlay():
             print("Erreur : Les arguments passes ne sont pas bons, recommencez.")
             continue
 
-        elif not validPosition(grid, number, letters.get(letter), d, ships_len[0]):
+        elif not validPosition(grid, number-1, letters.get(letter), d, ships_len[0]):
             print("Erreur : Le "+ships[0]+" ne rentre pas dans la grille.")
             continue
 
-        set_ships(grid, number, letters.get(letter), d, ships_len[0], code[0])
+        set_ships(grid, number-1, letters.get(letter), d, ships_len[0], code[0])
         del ships[0]
         del ships_len[0]
         del code[0]
