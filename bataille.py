@@ -16,11 +16,11 @@ def validPosition(array, l, c, d, t):
         return True
 
     elif d==2:
-        for i in range(t, 0, -1):
+        for i in range(t):
             try:
-                if array[l-i][c]!=0 or (l-i)<0: # au cas ou l'indice soit negatif
-                    return False                # cela couperait le bateau
-                
+                if array[l+i][c]!=0:
+                    return False
+
             except IndexError:
                 return False
 
@@ -35,8 +35,8 @@ def set_ships(grid, l, c, d, t, value):
             grid[l][c+i] = value
 
     else:
-        for i in range(t, 0, -1):
-            grid[l-i][c] = value
+        for i in range(t):
+            grid[l+i][c] = value
 
 def initGridComp():
     gridComp = creategrid()
@@ -64,7 +64,11 @@ def printGrid(grid):
         for j in grid[i]:
             print(j, end=" ")
 
-        print(i, end=" ")
+        print("")
+    
+    print(i+2, end=" ")
+    for j in grid[i+1]:
+        print(j, end=" ")
 
     print("")
 
@@ -91,7 +95,7 @@ def initGridPlay():
             print("Erreur : Le "+ships[0]+" ne rentre pas dans la grille.")
             continue
 
-        grid = set_ships(grid, number, letters.get(letter), d, ships_len[0], code[0])
+        set_ships(grid, number, letters.get(letter), d, ships_len[0], code[0])
         del ships[0]
         del ships_len[0]
         del code[0]
