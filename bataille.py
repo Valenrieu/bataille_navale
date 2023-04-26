@@ -65,7 +65,7 @@ def printGrid(grid):
 
         print("")
     
-    print(i+2, end=" ")
+    print(10, end=" ")
     for j in grid[i+1]:
         print(j, end=" ")
 
@@ -98,3 +98,68 @@ def initGridPlay():
         del ships[0]
         del ships_len[0]
         del code[0]
+
+def hasDrowned(grid, num):
+    for i in grid:
+        if num in i:
+            return False
+
+    return True
+
+def oneMove(grid, line, col):
+    ships = {1:"porte-avions", 2:"croiseur", 3:"contre-torpilleur", 4:"sous-marin",
+            5:"torpilleur"}
+
+    if grid[line][col]==0:
+        print("A l'eau")
+
+    else:
+        print("Touche")
+        value = grid[line][col]
+        grid[line][col] = 6
+
+        if hasDrowned(grid, value):
+            print(ships.get(value)+" coule")
+
+    return grid
+
+def isOver(grid):
+    for i in grid:
+        for j in i:
+            if j!=0 and j!=6:
+                return False
+
+    return True
+
+def playComp():
+    res = random.randint(0, 9), random.randint(0, 9)
+
+    return list(res)
+
+def playPlayer(grid1, grid2):
+    letters = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9}
+
+    rep = input("Sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
+
+    if rep=="AFFICHER":
+        res = grid2
+        
+        for i in range(len(res)):
+            for j in range(len(res)):
+                if res[i][j]!=0 and res[i][j]!=6:
+                    res[i][j] = 0
+
+        printGrid(res)
+        playPlayer(grid1, grid2)
+
+    elif len(rep)==2:
+        if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>10:
+            print("La position n'est pas valide")
+            playPlayer(grid1, grid2)
+
+        else:
+            return letters.get(rep[0]), int(rep[1])
+
+    else:
+        print("L'argument n'est pas valide")
+        playPlayer(grid1, grid2)
