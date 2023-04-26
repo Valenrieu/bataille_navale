@@ -64,7 +64,7 @@ def printGrid(grid):
             print(j, end=" ")
 
         print("")
-    
+
     print(10, end=" ")
     for j in grid[i+1]:
         print(j, end=" ")
@@ -143,23 +143,30 @@ def playPlayer(grid1, grid2):
 
     if rep=="AFFICHER":
         res = grid2
-        
+
         for i in range(len(res)):
             for j in range(len(res)):
                 if res[i][j]!=0 and res[i][j]!=6:
                     res[i][j] = 0
 
         printGrid(res)
-        playPlayer(grid1, grid2)
+        return playPlayer(grid1, grid2)
 
-    elif len(rep)==2:
-        if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>10:
-            print("La position n'est pas valide")
-            playPlayer(grid1, grid2)
+    elif (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
+        if len(rep)==2:
+            if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>9:
+                print("La position n'est pas valide")
+                return playPlayer(grid1, grid2)
+
+            return letters.get(rep[0]), int(rep[1])-1
 
         else:
-            return letters.get(rep[0]), int(rep[1])
+            if rep[0]<"A" or rep[0]>"Z" or int(rep[1]+rep[2])!=10:
+                print("La position n'est pas valide")
+                return playPlayer(grid1, grid2)
+
+            return letters.get(rep[0]), int(rep[1]+rep[2])-1
 
     else:
         print("L'argument n'est pas valide")
-        playPlayer(grid1, grid2)
+        return playPlayer(grid1, grid2)
