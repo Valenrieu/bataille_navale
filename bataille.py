@@ -82,22 +82,29 @@ def initGridPlay():
     print("** Placement des bateaux : **")
 
     while len(code)!=0:
-        letter = input("Donnez la lettre pour le "+ships[0]+" :\n").upper()
-        number = int(input("Donnez le nombre pour le "+ships[0]+" :\n"))
-        d = int(input("Voulez-vous qu'il soit horizontal (1) ou vertical (2) ?\n"))
+        try:
+            letter = input("Donnez la lettre pour le "+ships[0]+" :\n").upper()
+            number = int(input("Donnez le nombre pour le "+ships[0]+" :\n"))
+            d = int(input("Voulez-vous qu'il soit horizontal (1) ou vertical (2) ?\n"))
 
-        if letter not in letters or number>=11 or number<0 or d not in (1, 2) or type(number)!=int:
-            print("Erreur : Les arguments passes ne sont pas bons, recommencez.")
+            if letter not in letters or number>=11 or number<0 or d not in (1, 2) or type(number)!=int:
+                print("Erreur : Les arguments passes ne sont pas bons, recommencez.")
+                continue
+
+            elif not validPosition(grid, number-1, letters.get(letter), d, ships_len[0]):
+                print("Erreur : Le "+ships[0]+" ne rentre pas dans la grille.")
+                continue
+
+            set_ships(grid, number-1, letters.get(letter), d, ships_len[0], code[0])
+            del ships[0]
+            del ships_len[0]
+            del code[0]
+
+        except ValueError:
+            print("Les arguments ne sont pas bons, recommencez.")
             continue
 
-        elif not validPosition(grid, number-1, letters.get(letter), d, ships_len[0]):
-            print("Erreur : Le "+ships[0]+" ne rentre pas dans la grille.")
-            continue
-
-        set_ships(grid, number-1, letters.get(letter), d, ships_len[0], code[0])
-        del ships[0]
-        del ships_len[0]
-        del code[0]
+    return grid
 
 def hasDrowned(grid, num):
     for i in grid:
@@ -152,21 +159,42 @@ def playPlayer(grid1, grid2):
         printGrid(res)
         return playPlayer(grid1, grid2)
 
-    elif (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
-        if len(rep)==2:
-            if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>9:
-                print("La position n'est pas valide")
-                return playPlayer(grid1, grid2)
+    try:
+        if (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
+            if len(rep)==2:
+                if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>9:
+                    print("La position n'est pas valide")
+                    return playPlayer(grid1, grid2)
 
-            return letters.get(rep[0]), int(rep[1])-1
+                return letters.get(rep[0]), int(rep[1])-1
+
+            else:
+                if rep[0]<"A" or rep[0]>"Z" or int(rep[1]+rep[2])!=10:
+                    print("La position n'est pas valide")
+                    return playPlayer(grid1, grid2)
+
+                return letters.get(rep[0]), int(rep[1]+rep[2])-1
 
         else:
-            if rep[0]<"A" or rep[0]>"Z" or int(rep[1]+rep[2])!=10:
-                print("La position n'est pas valide")
-                return playPlayer(grid1, grid2)
+            print("L'argument n'est pas valide")
+            return playPlayer(grid1, grid2)
 
-            return letters.get(rep[0]), int(rep[1]+rep[2])-1
-
-    else:
+    except ValueError:
         print("L'argument n'est pas valide")
         return playPlayer(grid1, grid2)
+
+def play():
+    j1 = initGridPlay()
+    j2 = initGridPlay()
+
+    while not isOver(j1):
+        print("Joueur 1,", end=" ")
+        move = playPlayer(j1, j2)
+        j2 = oneMove(j2, move[0], move[1])
+
+        if isOver(j2):
+            break
+
+        print("Joueur 2,", end=" ")
+        move = playPlayer(j2, j1)
+        j1 = oneMove(j1, move[0], move[1])
