@@ -105,6 +105,8 @@ def initGridPlay():
             print("Les arguments ne sont pas bons, recommencez.")
             continue
 
+    print("\n"*50)
+
     return grid
 
 def hasDrowned(grid, num):
