@@ -114,8 +114,8 @@ def hasDrowned(grid, num):
     return True
 
 def oneMove(grid, line, col):
-    ships = {1:"porte-avions", 2:"croiseur", 3:"contre-torpilleur", 4:"sous-marin",
-            5:"torpilleur"}
+    ships = {1:"Porte-avions", 2:"Croiseur", 3:"Contre-torpilleur", 4:"Sous-marin",
+            5:"Torpilleur"}
 
     if grid[line][col]==0:
         print("A l'eau")
@@ -146,7 +146,7 @@ def playComp():
 def playPlayer(grid1, grid2):
     letters = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9}
 
-    rep = input("Sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
+    rep = input("sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
 
     if rep=="AFFICHER":
         res = grid2
@@ -159,8 +159,8 @@ def playPlayer(grid1, grid2):
         printGrid(res)
         return playPlayer(grid1, grid2)
 
-    try:
-        if (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
+    elif (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
+        try:
             if len(rep)==2:
                 if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>9:
                     print("La position n'est pas valide")
@@ -175,11 +175,11 @@ def playPlayer(grid1, grid2):
 
                 return letters.get(rep[0]), int(rep[1]+rep[2])-1
 
-        else:
+        except ValueError:
             print("L'argument n'est pas valide")
             return playPlayer(grid1, grid2)
 
-    except ValueError:
+    else:
         print("L'argument n'est pas valide")
         return playPlayer(grid1, grid2)
 
