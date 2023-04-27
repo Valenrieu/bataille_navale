@@ -1,4 +1,5 @@
 import random
+import copy
 
 def creategrid():
     return [[0]*10 for i in range(10)]
@@ -149,7 +150,7 @@ def playPlayer(grid1, grid2):
     rep = input("sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
 
     if rep=="AFFICHER":
-        res = grid2
+        res = copy.deepcopy(grid2)
 
         for i in range(len(res)):
             for j in range(len(res)):
@@ -192,7 +193,7 @@ def play():
         move = playPlayer(j1, j2)
         j2 = oneMove(j2, move[0], move[1])
 
-        if isOver(j2):
+        if not isOver(j2):
             break
 
         print("Joueur 2,", end=" ")
