@@ -147,7 +147,7 @@ def playComp():
 def playPlayer(grid1, grid2):
     letters = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9}
 
-    rep = input("sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
+    rep = input("Sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
 
     if rep=="AFFICHER":
         res = copy.deepcopy(grid2)
@@ -163,18 +163,18 @@ def playPlayer(grid1, grid2):
     elif (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
         try:
             if len(rep)==2:
-                if rep[0]<"A" or rep[0]>"Z" or int(rep[1])<1 or int(rep[1])>9:
+                if rep[0]<"A" or rep[0]>"J" or int(rep[1])<1 or int(rep[1])>9:
                     print("La position n'est pas valide")
                     return playPlayer(grid1, grid2)
 
-                return letters.get(rep[0]), int(rep[1])-1
+                return int(rep[1])-1, letters.get(rep[0])
 
             else:
-                if rep[0]<"A" or rep[0]>"Z" or int(rep[1]+rep[2])!=10:
+                if rep[0]<"A" or rep[0]>"J" or int(rep[1]+rep[2])!=10:
                     print("La position n'est pas valide")
                     return playPlayer(grid1, grid2)
 
-                return letters.get(rep[0]), int(rep[1]+rep[2])-1
+                return int(rep[1]+rep[2])-1, letters.get(rep[0])
 
         except ValueError:
             print("L'argument n'est pas valide")
@@ -189,13 +189,13 @@ def play():
     j2 = initGridPlay()
 
     while not isOver(j1):
-        print("Joueur 1,", end=" ")
+        print("Joueur 1 !", end=" ")
         move = playPlayer(j1, j2)
         j2 = oneMove(j2, move[0], move[1])
 
-        if not isOver(j2):
+        if isOver(j2):
             break
 
-        print("Joueur 2,", end=" ")
+        print("Joueur 2 !", end=" ")
         move = playPlayer(j2, j1)
         j1 = oneMove(j1, move[0], move[1])
