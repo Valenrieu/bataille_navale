@@ -189,15 +189,31 @@ def playPlayer(grid1, grid2):
 def play():
     j1 = initGridPlay()
     j2 = initGridPlay()
+    move1 = []
+    move2 = []
+    win = "Joueur 2"
 
     while not isOver(j1):
         print("Joueur 1 !", end=" ")
         move = playPlayer(j1, j2)
+        while move in move1:
+            print("Vous avez deja joue ce coup.")
+            move = playPlayer(j1, j2)
+
+        move1.append(move)
         j2 = oneMove(j2, move[0], move[1])
 
         if isOver(j2):
+            win = "Joueur 1"
             break
 
         print("Joueur 2 !", end=" ")
         move = playPlayer(j2, j1)
+        while move in move2:
+            print("Vous avez deja joue ce coup.")
+            move = playPlayer(j2, j1)
+
+        move2.append(move)
         j1 = oneMove(j1, move[0], move[1])
+
+    print(win+" a gagne !")
