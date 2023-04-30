@@ -1,8 +1,14 @@
 import random
 import copy
+from time import sleep
+
+# Renvoie une grille 10x10 sous forme de liste de listes
 
 def creategrid():
     return [[0]*10 for i in range(10)]
+
+# Renvoie True si le bateau rentre dans la grille et ne chevauche pas un autre bateau
+# Renvoie False sinon
 
 def validPosition(array, l, c, d, t):
     if d==1:
@@ -30,6 +36,8 @@ def validPosition(array, l, c, d, t):
     else:
         raise ValueError(f"d={d} is not a valid argument.")
 
+# Place le bateau sur la grille grid
+
 def set_ships(grid, l, c, d, t, value):
     if d==1:
         for i in range(t):
@@ -38,6 +46,8 @@ def set_ships(grid, l, c, d, t, value):
     else:
         for i in range(t):
             grid[l+i][c] = value
+
+# Initialise la grille de l'ordi en placant les bateaux aleatoirement
 
 def initGridComp():
     gridComp = creategrid()
@@ -55,6 +65,8 @@ def initGridComp():
 
     return gridComp
 
+# Permet d'afficher la grille
+
 def printGrid(grid):
     print("   A B C D E F G H I J")
 
@@ -71,6 +83,8 @@ def printGrid(grid):
         print(j, end=" ")
 
     print("")
+
+# Permet d'itinitialiser la grille du joueur
 
 def initGridPlay():
     grid = creategrid()
@@ -109,6 +123,8 @@ def initGridPlay():
 
     return grid
 
+# Retourne True si le bateau dont le code est num a coule, False sinon
+
 def hasDrowned(grid, num):
     for i in grid:
         if num in i:
@@ -116,12 +132,14 @@ def hasDrowned(grid, num):
 
     return True
 
+# Permet l'affichage a l'ecran des actions, et la modification de la grille a chaque tour
+
 def oneMove(grid, line, col):
     ships = {1:"Porte-avions", 2:"Croiseur", 3:"Contre-torpilleur", 4:"Sous-marin",
             5:"Torpilleur"}
 
     if grid[line][col]==0:
-        print("A l'eau")
+        print("A l'eau\n")
 
     else:
         print("Touche")
@@ -131,7 +149,11 @@ def oneMove(grid, line, col):
         if hasDrowned(grid, value):
             print(ships.get(value)+" coule")
 
+        print("")
+
     return grid
+
+# Retourne True s'il n'y a plus de bateau non coules, False sinon
 
 def isOver(grid):
     for i in grid:
@@ -141,10 +163,15 @@ def isOver(grid):
 
     return True
 
+# Renvoie 2 entiers entre 0 et 9 compris pour que l'ordi joue aleatoirement
+
 def playComp():
     res = random.randint(0, 9), random.randint(0, 9)
 
     return list(res)
+
+# Permet l'affichage de la grille si le joueur le demande, renvoie les numeros de
+# colonnes et lignes sur laquelle le joueur veut tirer
 
 def playPlayer(grid1, grid2):
     letters = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9}
@@ -185,35 +212,125 @@ def playPlayer(grid1, grid2):
     else:
         print("L'argument n'est pas valide")
         return playPlayer(grid1, grid2)
+    
+# Fonction qui implemente la partie
 
 def play():
-    j1 = initGridPlay()
-    j2 = initGridPlay()
-    move1 = []
-    move2 = []
-    win = "Joueur 2"
+    letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
+    mode = input("** Bienvenue, voulez-vous jouer joueur contre joueur (1), joueur contre IA (2) ou IA contre IA (3). **\n")
 
-    while not isOver(j1):
-        print("Joueur 1 !", end=" ")
-        move = playPlayer(j1, j2)
-        while move in move1:
-            print("Vous avez deja joue ce coup.")
+    # Mode joueur contre joueur
+
+    if mode=="1":
+        j1 = initGridPlay()
+        j2 = initGridPlay()
+        move1 = []
+        move2 = []
+        win = "Joueur 2"
+
+        while not isOver(j1):
+            print("Joueur 1 !", end=" ")
             move = playPlayer(j1, j2)
+            while move in move1:
+                print("Vous avez deja joue ce coup.")
+                move = playPlayer(j1, j2)
 
-        move1.append(move)
-        j2 = oneMove(j2, move[0], move[1])
+            move1.append(move)
+            j2 = oneMove(j2, move[0], move[1])
 
-        if isOver(j2):
-            win = "Joueur 1"
-            break
+            if isOver(j2):
+                win = "Joueur 1"
+                break
 
-        print("Joueur 2 !", end=" ")
-        move = playPlayer(j2, j1)
-        while move in move2:
-            print("Vous avez deja joue ce coup.")
+            print("Joueur 2 !", end=" ")
             move = playPlayer(j2, j1)
+            while move in move2:
+                print("Vous avez deja joue ce coup.")
+                move = playPlayer(j2, j1)
 
-        move2.append(move)
-        j1 = oneMove(j1, move[0], move[1])
+            move2.append(move)
+            j1 = oneMove(j1, move[0], move[1])
 
-    print(win+" a gagne !")
+        print(win+" a gagne !")
+
+    # Mode joueur contre IA
+
+    elif mode=="2":
+        j1 = initGridPlay()
+        j2 = initGridComp()
+        move1 = []
+        move2 = []
+        win = "IA"
+
+        while not isOver(j1):
+            print("Joueur 1 !", end=" ")
+            move = playPlayer(j1, j2)
+            while move in move1:
+                print("Vous avez deja joue ce coup.")
+                move = playPlayer(j1, j2)
+
+            move1.append(move)
+            j2 = oneMove(j2, move[0], move[1])
+
+            if isOver(j2):
+                win = "Joueur 1"
+                break
+
+            print("L'IA a joue :")
+            move = playComp()
+            while move in move2:
+                move = playComp()
+
+            print(move[0], letters.get(move[1]), sep="")
+            move2.append(move)
+            j1 = oneMove(j1, move[0], move[1])
+
+        print(win+" a gagne !")
+
+    # Mode IA contre IA
+
+    elif mode=="3":
+        try:
+            time = float(input("Quel doit etre le temps en secondes entre chaque action de l'IA ?\n"))
+        
+        except ValueError:
+            time = 0
+            print("Par defaut, le temps sera de 0 sec.")
+
+        j1 = initGridComp()
+        j2 = initGridComp()
+        move1 = []
+        move2 = []
+        win = "IA 2"
+
+        while not isOver(j1):
+            print("L'IA 1 a joue :")
+            move = playComp()
+            while move in move1:
+                move = playComp()
+
+            print(move[0], letters.get(move[1]), sep="")
+            move1.append(move)
+            j2 = oneMove(j2, move[0], move[1])
+
+            if isOver(j2):
+                win = "IA 1"
+                break
+
+            sleep(time)
+
+            print("L'IA 2 a joue :")
+            move = playComp()
+            while move in move2:
+                move = playComp()
+
+            print(move[0], letters.get(move[1]), sep="")
+            move2.append(move)
+            j1 = oneMove(j1, move[0], move[1])
+            sleep(time)
+
+        print(win+" a gagne !")
+
+    else:
+        print("Le choix n'est pas bon !")
+        return play()
