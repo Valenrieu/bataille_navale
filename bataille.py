@@ -308,12 +308,13 @@ def load():
 
 # Fonction qui permet le deroulement de la partie, attention, si vous faites
 # une partie IAcIA, et que le temps de reponse est tres rapide, il se peut
-# que vous fassiez CTRL+C en meme avant qu'il ne sauvegarde, et donc la
-# sauvegarde sera inutilisable
+# que si vous faites une interruption en fermant la fenetre, la sauvegarde
+# ne soit pas bonne, il est conseille de faire CTRL+C pour l'arreter.
 
 def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
     letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
-    
+    next = player1    
+
     try:
         if mode=="1":
             win = player2
@@ -329,6 +330,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j2 = oneMove(j2, move[0], move[1])
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
+                next = player2
 
                 if isOver(j2):
                     win = player1
@@ -344,6 +346,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j1 = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
+                next = player1
 
             print(win+" a gagne !")
 
@@ -361,6 +364,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j2 = oneMove(j2, move[0], move[1])
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
+                next = player2
 
                 if isOver(j2):
                     win = player1
@@ -376,6 +380,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j1 = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
+                next = player1
 
             print(win+" a gagne !")
 
@@ -393,6 +398,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j2 = oneMove(j2, move[0], move[1])
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2, time=time)
+                next = player2
 
                 if isOver(j2):
                     win = player1
@@ -410,11 +416,21 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j1 = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2, time=time)
+                next = player1
                 sleep(time)
 
             print(win+" a gagne !")
 
     except KeyboardInterrupt:
+        with open("game_data.txt", "r") as file:
+            data = file.readlines()
+
+            # Si jamais l'interruption a ete faite en plein ecrasement des
+            # anciennes donnees
+
+            if len(data)<=2:
+                save(next, j1, move1, player1, j2, move2, player2, time=time)
+        
         print("Au-revoir !")
         quit()
 
