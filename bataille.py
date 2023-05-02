@@ -324,10 +324,14 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
     next = player1
 
     try:
+
+        # Mode JcJ
+
         if mode=="1":
             win = player2
 
             while not isOver(j1):
+                next = player2
                 print(player1+" !", end=" ")
                 move = playPlayer(j1, j2)
                 while move in move1:
@@ -338,12 +342,12 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j2 = oneMove(j2, move[0], move[1])[0]
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
-                next = player2
 
                 if isOver(j2):
                     win = player1
                     break
 
+                next = player1
                 print(player2+" !", end=" ")
                 move = playPlayer(j2, j1)
                 while move in move2:
@@ -354,14 +358,16 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j1 = oneMove(j1, move[0], move[1])[0]
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
-                next = player1
 
             print(win+" a gagne !")
+
+        # Mode JcIA
 
         elif mode=="2":
             win = player2
 
             while not isOver(j1):
+                next = player2
                 print(player1+" !", end=" ")
                 move = playPlayer(j1, j2)
                 while move in move1:
@@ -372,37 +378,38 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 j2 = oneMove(j2, move[0], move[1])[0]
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
-                next = player2
 
                 if isOver(j2):
                     win = player1
                     break
 
+                next = player1
                 print("L'IA a joue :")
                 move = playComp(move2)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
-                j1 = oneMove(j1, move[0], move[1])
+                j1, last = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
-                next = player1
 
             print(win+" a gagne !")
+
+        # Mode IAcIA
 
         elif mode=="3":
             win = player2
 
             while not isOver(j1):
+                next = player2
                 print("L'"+player1+" a joue :")
                 move = playComp(move1)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move1.append(move)
-                j2, last = oneMove(j2, move[0], move[1])
+                j2, last1 = oneMove(j2, move[0], move[1])
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2, time=time)
-                next = player2
 
                 if isOver(j2):
                     win = player1
@@ -410,15 +417,15 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
 
                 sleep(time)
 
+                next = player1
                 print("L'"+player2+" a joue :")
                 move = playComp(move2)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
-                j1, last = oneMove(j1, move[0], move[1])
+                j1, last2 = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2, time=time)
-                next = player1
                 sleep(time)
 
             print(win+" a gagne !")
@@ -431,8 +438,9 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
             # anciennes donnees
 
             if len(data)<=2:
+                init_data(mode)
                 save(next, j1, move1, player1, j2, move2, player2, time=time)
-        
+
         print("Au-revoir !")
         quit()
 
@@ -467,7 +475,7 @@ def play():
                 time = float(input("Quel doit etre le temps en secondes entre chaque action de l'IA ?\n"))
 
             except ValueError:
-                time = 0
+                time = float(0)
                 print("Par defaut, le temps sera de 0 sec.")
 
             j1 = initGridComp()
@@ -514,4 +522,4 @@ def play():
         print("Au-revoir !")
         quit()
 
-print(play())
+play()
