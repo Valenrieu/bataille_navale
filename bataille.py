@@ -140,6 +140,7 @@ def oneMove(grid, line, col):
 
     if grid[line][col]==0:
         print("A l'eau\n")
+        value = 0
 
     else:
         print("Touche")
@@ -151,7 +152,7 @@ def oneMove(grid, line, col):
 
         print("")
 
-    return grid
+    return grid, value
 
 # Retourne True s'il n'y a plus de bateau non coules, False sinon
 
@@ -165,7 +166,7 @@ def isOver(grid):
 
 # Implemente l'IA, renvoie une liste de deux entiers entre 0 et 9
 
-def playComp(move, grid2):
+def playComp(move):
     res = random.randint(0, 9), random.randint(0, 9)
 
     while list(res) in move:
@@ -320,7 +321,7 @@ def load():
 
 def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
     letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
-    next = player1    
+    next = player1
 
     try:
         if mode=="1":
@@ -334,7 +335,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                     move = playPlayer(j1, j2)
 
                 move1.append(move)
-                j2 = oneMove(j2, move[0], move[1])
+                j2 = oneMove(j2, move[0], move[1])[0]
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
                 next = player2
@@ -350,7 +351,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                     move = playPlayer(j2, j1)
 
                 move2.append(move)
-                j1 = oneMove(j1, move[0], move[1])
+                j1 = oneMove(j1, move[0], move[1])[0]
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
                 next = player1
@@ -368,7 +369,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                     move = playPlayer(j1, j2)
 
                 move1.append(move)
-                j2 = oneMove(j2, move[0], move[1])
+                j2 = oneMove(j2, move[0], move[1])[0]
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
                 next = player2
@@ -378,7 +379,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                     break
 
                 print("L'IA a joue :")
-                move = playComp(move2, j1)
+                move = playComp(move2)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
@@ -394,11 +395,11 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
 
             while not isOver(j1):
                 print("L'"+player1+" a joue :")
-                move = playComp(move1, j2)
+                move = playComp(move1)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move1.append(move)
-                j2 = oneMove(j2, move[0], move[1])
+                j2, last = oneMove(j2, move[0], move[1])
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2, time=time)
                 next = player2
@@ -410,11 +411,11 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 sleep(time)
 
                 print("L'"+player2+" a joue :")
-                move = playComp(move2, j1)
+                move = playComp(move2)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
-                j1 = oneMove(j1, move[0], move[1])
+                j1, last = oneMove(j1, move[0], move[1])
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2, time=time)
                 next = player1
@@ -439,7 +440,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
 
 def play():
     try:
-        mode = input("** Bienvenue, voulez-vous jouer joueur contre joueur (1), joueur contre IA (2), IA contre IA (3) ou reprise de la partie precedente (4). **\n")
+        mode = input("** Bienvenue, voulez-vous jouer joueur contre joueur (1), joueur contre IA (2), IA contre IA (3) ou reprendre de la partie precedente (4). **\n")
 
         # Mode joueur contre joueur
 
@@ -512,3 +513,5 @@ def play():
     except KeyboardInterrupt:
         print("Au-revoir !")
         quit()
+
+print(play())
