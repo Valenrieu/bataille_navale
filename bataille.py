@@ -163,10 +163,13 @@ def isOver(grid):
 
     return True
 
-# Renvoie 2 entiers entre 0 et 9 compris pour que l'ordi joue aleatoirement
+# Implemente l'IA, renvoie une liste de deux entiers entre 0 et 9
 
-def playComp():
+def playComp(move, grid2):
     res = random.randint(0, 9), random.randint(0, 9)
+
+    while list(res) in move:
+        res = random.randint(0, 9), random.randint(0, 9)
 
     return list(res)
 
@@ -212,7 +215,7 @@ def playPlayer(grid1, grid2):
     else:
         print("L'argument n'est pas valide")
         return playPlayer(grid1, grid2)
-    
+
 # Permet de reinitialiser les donnes du jeu a chaque tour
 
 def init_data(mode):
@@ -303,15 +306,19 @@ def load():
     except ValueError:
         pass
 
+    except IndexError:
+        pass
+
     file.close()
     return mode, next, player1, move1, grid1, player2, move2, grid2, time
 
 # Fonction qui permet le deroulement de la partie, attention, si vous faites
 # une partie IAcIA, et que le temps de reponse est tres rapide, il se peut
 # que si vous faites une interruption en fermant la fenetre, la sauvegarde
-# ne soit pas bonne, il est conseille de faire CTRL+C pour l'arreter.
+# ne soit pas bonne, il est conseille de faire CTRL+C pour l'arreter. La sauvegarde
+# se fait automatiquement
 
-def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
+def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
     letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
     next = player1    
 
@@ -371,9 +378,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                     break
 
                 print("L'IA a joue :")
-                move = playComp()
-                while move in move2:
-                    move = playComp()
+                move = playComp(move2, j1)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
@@ -389,9 +394,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
 
             while not isOver(j1):
                 print("L'"+player1+" a joue :")
-                move = playComp()
-                while move in move1:
-                    move = playComp()
+                move = playComp(move1, j2)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move1.append(move)
@@ -407,9 +410,7 @@ def game_run(mode, j1, j2, player1, player2, move1, move2, time=None):
                 sleep(time)
 
                 print("L'"+player2+" a joue :")
-                move = playComp()
-                while move in move2:
-                    move = playComp()
+                move = playComp(move2, j1)
 
                 print(move[0], letters.get(move[1]), sep="")
                 move2.append(move)
@@ -447,7 +448,7 @@ def play():
             j2 = initGridPlay()
             move1 = []
             move2 = []
-            game_run(mode, j1, j2, "Joueur 1", "Joueur 2", move1, move2)
+            run_game(mode, j1, j2, "Joueur 1", "Joueur 2", move1, move2)
 
         # Mode joueur contre IA
 
@@ -456,7 +457,7 @@ def play():
             j2 = initGridComp()
             move1 = []
             move2 = []
-            game_run(mode, j1, j2, "Joueur 1", "IA", move1, move2)
+            run_game(mode, j1, j2, "Joueur 1", "IA", move1, move2)
 
         # Mode IA contre IA
 
@@ -472,7 +473,7 @@ def play():
             j2 = initGridComp()
             move1 = []
             move2 = []
-            game_run(mode, j1, j2, "IA 1", "IA 2", move1, move2, time=time)
+            run_game(mode, j1, j2, "IA 1", "IA 2", move1, move2, time=time)
 
         # Reprise de partie
 
@@ -498,7 +499,7 @@ def play():
                     print("La partie est finie, recommencez-en une.")
                     return play()
 
-                game_run(mode, j1, j2, player1, player2, move1, move2, time=time)
+                run_game(mode, j1, j2, player1, player2, move1, move2, time=time)
 
             except IndexError:
                 print("Il n'y a pas de partie a charger.")
