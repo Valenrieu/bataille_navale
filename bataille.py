@@ -1,5 +1,6 @@
 import random
 import copy
+import sys
 from time import sleep
 
 # Renvoie une grille 10x10 sous forme de liste de listes
@@ -134,23 +135,29 @@ def hasDrowned(grid, num):
 
 # Permet l'affichage a l'ecran des actions, et la modification de la grille a chaque tour
 
-def oneMove(grid, line, col):
+def oneMove(grid, line, col, show=True):
     ships = {1:"Porte-avions", 2:"Croiseur", 3:"Contre-torpilleur", 4:"Sous-marin",
             5:"Torpilleur"}
 
     if grid[line][col]==0:
-        print("A l'eau\n")
+        if show==True:
+            print("A l'eau\n")
+
         value = 0
 
     else:
-        print("Touche")
+        if show==True:
+            print("Touche")
+
         value = grid[line][col]
         grid[line][col] = 6
 
         if hasDrowned(grid, value):
-            print(ships.get(value)+" coule")
+            if show==True:
+                print(ships.get(value)+" coule")
 
-        print("")
+        if show==True:
+            print("")
 
     return grid, value
 
@@ -164,15 +171,21 @@ def isOver(grid):
 
     return True
 
-# Implemente l'IA, renvoie une liste de deux entiers entre 0 et 9
+# Implemente l'IA, renvoie un tuple de deux entiers entre 0 et 9
 
 def playComp(move):
     res = random.randint(0, 9), random.randint(0, 9)
+    change = True
 
-    while list(res) in move:
-        res = random.randint(0, 9), random.randint(0, 9)
+    while change==True:
+        change = False
 
-    return list(res)
+        for i in move:
+            if res==i[0]:
+                res = random.randint(0, 9), random.randint(0, 9)
+                change = True
+
+    return res
 
 # Permet l'affichage de la grille si le joueur le demande, renvoie les numeros de
 # colonnes et lignes sur laquelle le joueur veut tirer
@@ -226,8 +239,8 @@ def init_data(mode):
 # Permet de sauver les donnees du jeu dans 'game_data.txt' de la maniere suivante :
 # 1ere ligne, le mode de jeu, 1, 2 ou 3 (JcJ, JcIA, IAcIA)
 # 2e ligne : le nom du prochain joueur, 3e : le nom du joueur 1
-# 4e : tous les coups joues par j1, 5 a 14 : la grille de j1
-# 15e : le nom du joueur 2, 16e : les coups du j2
+# 4e : tous les coups joues par j1 et le resultat, 5 a 14 : la grille de j1
+# 15e : le nom du joueur 2, 16e : les coups du j2 et resultats
 # 17 a 26 : la grille de j2, eventuellement 27 le temps de reponse des IA
 
 def save(next, grid1, move1, player1, grid2, move2, player2, time=None):
@@ -236,7 +249,7 @@ def save(next, grid1, move1, player1, grid2, move2, player2, time=None):
     file.write(player1+"\n")
 
     for i in move1:
-        file.write(str(i[0])+str(i[1])+" ")
+        file.write(str(i[0][0])+str(i[0][1])+" "+str(i[1])+" ")
 
     file.write("\n")
 
@@ -249,7 +262,7 @@ def save(next, grid1, move1, player1, grid2, move2, player2, time=None):
     file.write(player2+"\n")
 
     for i in move2:
-        file.write(str(i[0])+str(i[1])+" ")
+        file.write(str(i[0][0])+str(i[0][1])+" "+str(i[1])+" ")
 
     file.write("\n")
 
@@ -281,11 +294,11 @@ def load():
     mode = data[0][:-1]
     next = data[1][:-1]
     
-    for i in range(0, len(data[3][:-1]), 3):
-        move1.append(tuple((int(data[3][i]), int(data[3][i+1]))))
+    for i in range(0, len(data[3][:-1]), 5):
+        move1.append(((int(data[3][i]), int(data[3][i+1])), int(data[3][i+3])))
 
-    for i in range(0, len(data[15][:-1]), 3):
-        move2.append(tuple((int(data[15][i]), int(data[15][i+1]))))
+    for i in range(0, len(data[15][:-1]), 5):
+        move2.append(((int(data[15][i]), int(data[15][i+1])), int(data[15][i+3])))
 
     for i in range(4, 14):
         res = []
@@ -334,12 +347,12 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 next = player2
                 print(player1+" !", end=" ")
                 move = playPlayer(j1, j2)
-                while move in move1:
+                while (move, oneMove(j2, move[0], move[1], show=False)[1]) in move1:
                     print("Vous avez deja joue ce coup.")
                     move = playPlayer(j1, j2)
 
-                move1.append(move)
-                j2 = oneMove(j2, move[0], move[1])[0]
+                j2, last1 = oneMove(j2, move[0], move[1])
+                move1.append((move, last1))
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
 
@@ -350,12 +363,12 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 next = player1
                 print(player2+" !", end=" ")
                 move = playPlayer(j2, j1)
-                while move in move2:
+                while (move, oneMove(j1, move[0], move[1], show=False)[1]) in move2:
                     print("Vous avez deja joue ce coup.")
                     move = playPlayer(j2, j1)
 
-                move2.append(move)
-                j1 = oneMove(j1, move[0], move[1])[0]
+                j1, last2 = oneMove(j1, move[0], move[1])
+                move2.append((move, last2))
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
 
@@ -370,12 +383,12 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 next = player2
                 print(player1+" !", end=" ")
                 move = playPlayer(j1, j2)
-                while move in move1:
+                while (move, oneMove(j2, move[0], move[1], show=False)[1]) in move1:
                     print("Vous avez deja joue ce coup.")
                     move = playPlayer(j1, j2)
 
-                move1.append(move)
-                j2 = oneMove(j2, move[0], move[1])[0]
+                j2, last1 = oneMove(j2, move[0], move[1])
+                move1.append((move, last1))
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2)
 
@@ -388,8 +401,8 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 move = playComp(move2)
 
                 print(move[0], letters.get(move[1]), sep="")
-                move2.append(move)
-                j1, last = oneMove(j1, move[0], move[1])
+                j1, last2 = oneMove(j1, move[0], move[1])
+                move2.append((move, last2))
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2)
 
@@ -406,8 +419,8 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 move = playComp(move1)
 
                 print(move[0], letters.get(move[1]), sep="")
-                move1.append(move)
                 j2, last1 = oneMove(j2, move[0], move[1])
+                move1.append((move, last1))
                 init_data(mode)
                 save(player2, j1, move1, player1, j2, move2, player2, time=time)
 
@@ -420,10 +433,9 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 next = player1
                 print("L'"+player2+" a joue :")
                 move = playComp(move2)
-
                 print(move[0], letters.get(move[1]), sep="")
-                move2.append(move)
                 j1, last2 = oneMove(j1, move[0], move[1])
+                move2.append((move, last2))
                 init_data(mode)
                 save(player1, j1, move1, player1, j2, move2, player2, time=time)
                 sleep(time)
@@ -442,7 +454,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, time=None):
                 save(next, j1, move1, player1, j2, move2, player2, time=time)
 
         print("Au-revoir !")
-        quit()
+        sys.exit()
 
 # Fonction qui implemente la partie
 
@@ -520,6 +532,6 @@ def play():
 
     except KeyboardInterrupt:
         print("Au-revoir !")
-        quit()
+        sys.exit()
 
 play()
