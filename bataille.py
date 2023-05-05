@@ -142,7 +142,6 @@ def oneMove(grid, line, col):
 
     if grid[line][col]==0:
         print("A l'eau\n")
-
         value = 0
 
     else:
@@ -208,19 +207,33 @@ def playComp(move, res1, difficulty):
                         # Si les coups sont sur la meme colonne
                         if move[index][0]!=move[-1][0]:
                             for j in range(1, ships_len.get(last)+1):
-                                if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
+                                if move[-1][0]>move[index][0] or move[-2][0]>move[index][0]:
+                                    if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
                                         possibilities.append((move[index][0]+j, move[index][1]))
 
+                            for j in range(1, ships_len.get(last)+1):
                                 if move[index][0]-j>=0 and (move[index][0]-j, move[index][1]) not in move:
-                                        possibilities.append((move[index][0]-j, move[index][1]))
+                                    possibilities.append((move[index][0]-j, move[index][1]))
+
+                            if len(possibilities)==0:
+                                for j in range(1, ships_len.get(last)+1):
+                                    if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
+                                        possibilities.append((move[index][0]+j, move[index][1]))
 
                         else:
                             for j in range(1, ships_len.get(last)+1):
-                                if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
-                                    possibilities.append((move[index][0], move[index][1]+j))
+                                if move[-1][1]>move[index][1]:
+                                    if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
+                                        possibilities.append((move[index][0], move[index][1]+j))
 
+                            for j in range(1, ships_len.get(last)+1):
                                 if move[index][1]-j>=0 and (move[index][0], move[index][1]-j) not in move:
                                     possibilities.append((move[index][0], move[index][1]-j))
+
+                            if len(possibilities)==0:
+                                for j in range(1, ships_len.get(last)+1):
+                                    if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
+                                        possibilities.append((move[index][0], move[index][1]+j))
 
                     return possibilities[0]
 
@@ -591,15 +604,15 @@ def play():
                 time = data[11]
                 mode = data[0]
 
-                if isOver(j1) or isOver(j2):
-                    print("La partie est finie, recommencez-en une.")
-                    return play()
-
-                run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=difficulty, time=time)
-
             except IndexError:
                 print("Il n'y a pas de partie a charger.")
                 return play()
+
+            if isOver(j1) or isOver(j2):
+                print("La partie est finie, recommencez-en une.")
+                return play()
+
+            run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=difficulty, time=time)
 
         else:
             print("Le choix n'est pas bon.")
