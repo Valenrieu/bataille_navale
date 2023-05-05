@@ -172,20 +172,71 @@ def isOver(grid):
 # Prend en argument l'historique des mouvements (liste) et les resultats
 # correspondants, aussi une liste
 
-def playComp(move, res2):
+def playComp(move, res1, difficulty):
     ships_len = {1:5, 2:4, 3:3, 4:3, 5:2}
+    last = None
+    possibilities = []
 
-    res = random.randint(0, 9), random.randint(0, 9)
-
-    while res in move:
+    if difficulty=="1":
         res = random.randint(0, 9), random.randint(0, 9)
 
-    return res
+        while res in move:
+            res = random.randint(0, 9), random.randint(0, 9)
+
+    elif difficulty=="2":
+        for i in range(len(res1)):
+            if res1[i]!=0:
+                last = res1[i]
+                index = i
+
+                if res1.count(last)!=ships_len.get(last):
+                    if res1[-1]!=last:
+                        for j in range(1, ships_len.get(last)+1):
+                            if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
+                                possibilities.append((move[index][0]+j, move[index][1]))
+
+                            if move[index][0]-j>=0 and (move[index][0]-j, move[index][1]) not in move:
+                                possibilities.append((move[index][0]-j, move[index][1]))
+
+                            if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
+                                possibilities.append((move[index][0], move[index][1]+j))
+
+                            if move[index][1]-j>=0 and (move[index][0], move[index][1]-j) not in move:
+                                possibilities.append((move[index][0], move[index][1]-j))
+
+                    else:
+                        # Si les coups sont sur la meme colonne
+                        if move[index][0]!=move[-1][0]:
+                            for j in range(1, ships_len.get(last)+1):
+                                if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
+                                        possibilities.append((move[index][0]+j, move[index][1]))
+
+                                if move[index][0]-j>=0 and (move[index][0]-j, move[index][1]) not in move:
+                                        possibilities.append((move[index][0]-j, move[index][1]))
+
+                        else:
+                            for j in range(1, ships_len.get(last)+1):
+                                if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
+                                    possibilities.append((move[index][0], move[index][1]+j))
+
+                                if move[index][1]-j>=0 and (move[index][0], move[index][1]-j) not in move:
+                                    possibilities.append((move[index][0], move[index][1]-j))
+
+                    return possibilities[0]
+
+        if last is None or res1.count(last)==ships_len.get(last):
+            res = random.randint(0, 9), random.randint(0, 9)
+
+            while res in move:
+                res = random.randint(0, 9), random.randint(0, 9)
+
+        return res
 
 # Permet l'affichage de la grille si le joueur le demande, renvoie les numeros de
-# colonnes et lignes sur laquelle le joueur veut tirer
+# colonnes et lignes sur laquelle le joueur veut tirer, si le joueur a tire
+# sur une case, une croix sera affichee.
 
-def playPlayer(grid1, grid2):
+def playPlayer(grid1, grid2, move1):
     letters = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9}
 
     rep = input("Sur quelle case voulez-vous tirer ? (ex : 'B1' ou 'D6'), tapez 'afficher' si vous voulez voir la grille adverse.\n").upper()
@@ -198,34 +249,37 @@ def playPlayer(grid1, grid2):
                 if res[i][j]!=0 and res[i][j]!=6:
                     res[i][j] = 0
 
+                elif (i, j) in move1 and res[i][j]!=6:
+                    res[i][j] = "x"
+
         printGrid(res)
-        return playPlayer(grid1, grid2)
+        return playPlayer(grid1, grid2, move1)
 
     elif (len(rep)==2 or len(rep)==3) and "A">=rep[1]<="Z":
         try:
             if len(rep)==2:
                 if rep[0]<"A" or rep[0]>"J" or int(rep[1])<1 or int(rep[1])>9:
                     print("La position n'est pas valide")
-                    return playPlayer(grid1, grid2)
+                    return playPlayer(grid1, grid2, move1)
 
                 return int(rep[1])-1, letters.get(rep[0])
 
             else:
                 if rep[0]<"A" or rep[0]>"J" or int(rep[1]+rep[2])!=10:
                     print("La position n'est pas valide")
-                    return playPlayer(grid1, grid2)
+                    return playPlayer(grid1, grid2, move1)
 
                 return int(rep[1]+rep[2])-1, letters.get(rep[0])
 
         except ValueError:
             print("L'argument n'est pas valide")
-            return playPlayer(grid1, grid2)
+            return playPlayer(grid1, grid2, move1)
 
     else:
         print("L'argument n'est pas valide")
-        return playPlayer(grid1, grid2)
+        return playPlayer(grid1, grid2, move1)
 
-# Permet de reinitialiser les donnes du jeu a chaque tour
+# Permet de reinitialiser les donnes du jeu a chaque sauvegarde
 
 def init_data(mode):
     with open("game_data.txt", "w") as file:
@@ -236,10 +290,10 @@ def init_data(mode):
 # 2e ligne : le nom du prochain joueur, 3e : le nom du joueur 1
 # 4e : tous les coups joues par j1, 5e les resultats des coups 6 a 15 :
 # la grille de j1, 16e : le nom du joueur 2, 17e : les coups du j2
-# 18 les resultats du joueur 2 19 a 28 : la grille de j2, eventuellement 29
-# le temps de reponse des IA
+# 18 les resultats du joueur 2 19 a 28 : la grille de j2, eventuellement 28, 29
+# la difficulte et le temps de reponse des IA
 
-def save(next, grid1, move1, res1, player1, grid2, move2, res2, player2, time=None):
+def save(next, grid1, move1, res1, player1, grid2, move2, res2, player2, difficulty=None, time=None):
     file = open("game_data.txt", "a")
     file.write(next+"\n")
     file.write(player1+"\n")
@@ -278,16 +332,20 @@ def save(next, grid1, move1, res1, player1, grid2, move2, res2, player2, time=No
 
         file.write("\n")
 
+    if difficulty is not None:
+        file.write(difficulty)
+
+    file.write("\n")
+
     if time is not None:
-        file.write(str(time))
-        file.write("\n")
+        file.write(str(time)+"\n")
 
     file.close()
 
 # Charge les donnes du fichier pour une reprise de jeu, renvoie un tuple
 # du mode de partie, le nom du prochain joueur qui doit jouer , le nom du
 # joueur1, les coups du joueur1, les resultats des coups, la grille du
-# joueur 1, la meme chose pour le joueur 2 ensuite, et le temps :
+# joueur 1, la meme chose pour le joueur 2 ensuite, la difficulte, et le temps :
 # None ou float
 
 def load():
@@ -295,6 +353,7 @@ def load():
     move1, move2 = [], []
     res1, res2 = [], []
     time = None
+    difficulty = None
     file = open("game_data.txt", "r")
     data = file.readlines()
 
@@ -329,7 +388,8 @@ def load():
         grid2.append(res)
 
     try:
-        time = float(data[28][:-1])
+        difficulty = data[28][:-1]
+        time = float(data[29][:-1])
 
     except ValueError:
         pass
@@ -338,13 +398,13 @@ def load():
         pass
 
     file.close()
-    return mode, next, player1, move1, res1, grid1, player2, move2, res2, grid2, time
+    return mode, next, player1, move1, res1, grid1, player2, move2, res2, grid2, difficulty, time
 
 # Fonction qui permet le deroulement de la partie, permet de sauvegarder 
 # automatiquement la partie si l'utilisateur fait CTRL+C, s'il quitte
 # sans faire CTRL+C, il n'y aura pas de sauvegarde
 
-def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None):
+def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=None, time=None):
     letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
     next = player1
 
@@ -356,33 +416,35 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None
             win = player2
 
             while not isOver(j1):
-                next = player2
                 print(player1+" !", end=" ")
-                move = playPlayer(j1, j2)
+                move = playPlayer(j1, j2, move1)
                 while move in move1:
                     print("Vous avez deja joue ce coup.")
-                    move = playPlayer(j1, j2)
+                    move = playPlayer(j1, j2, move1)
 
                 j2, last1 = oneMove(j2, move[0], move[1])
                 move1.append(move)
                 res1.append(last1)
+                next = player2
 
                 if isOver(j2):
                     win = player1
                     break
 
-                next = player1
                 print(player2+" !", end=" ")
-                move = playPlayer(j2, j1)
+                move = playPlayer(j2, j1, move2)
                 while move in move2:
                     print("Vous avez deja joue ce coup.")
-                    move = playPlayer(j2, j1)
+                    move = playPlayer(j2, j1, move1)
 
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
+                next = player1
 
             print(win+" a gagne !")
+            print("Au-revoir")
+            sleep(1)
 
         # Mode JcIA
 
@@ -390,16 +452,16 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None
             win = player2
 
             while not isOver(j1):
-                next = player2
                 print(player1+" !", end=" ")
-                move = playPlayer(j1, j2)
+                move = playPlayer(j1, j2, move1)
                 while move in move1:
                     print("Vous avez deja joue ce coup.")
-                    move = playPlayer(j1, j2)
+                    move = playPlayer(j1, j2, move1)
 
                 j2, last1 = oneMove(j2, move[0], move[1])
                 move1.append(move)
                 res1.append(last1)
+                next = player2
 
                 if isOver(j2):
                     win = player1
@@ -407,14 +469,16 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None
 
                 next = player1
                 print("L'IA a joue :")
-                move = playComp(move2)
+                move = playComp(move2, res2, difficulty)
 
-                print(move[0], letters.get(move[1]), sep="")
+                print(letters.get(move[1]), move[0], sep="")
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
 
             print(win+" a gagne !")
+            print("Au-revoir")
+            sleep(1)
 
         # Mode IAcIA
 
@@ -424,9 +488,9 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None
             while not isOver(j1):
                 next = player2
                 print("L'"+player1+" a joue :")
-                move = playComp(move1)
+                move = playComp(move1, res1, difficulty)
 
-                print(move[0], letters.get(move[1]), sep="")
+                print(letters.get(move[1]), move[0], sep="")
                 j2, last1 = oneMove(j2, move[0], move[1])
                 move1.append(move)
                 res1.append(last1)
@@ -439,19 +503,22 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=None
 
                 next = player1
                 print("L'"+player2+" a joue :")
-                move = playComp(move2)
-                print(move[0], letters.get(move[1]), sep="")
+                move = playComp(move2, res2, difficulty)
+                print(letters.get(move[1]), move[0], sep="")
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
                 sleep(time)
 
             print(win+" a gagne !")
+            print("Au-revoir")
+            sleep(1)
 
     except KeyboardInterrupt:
         init_data(mode)
-        save(next, j1, move1, res1, player1, j2, move2, res2, player2, time=time)
+        save(next, j1, move1, res1, player1, j2, move2, res2, player2, difficulty=difficulty, time=time)
         print("Au-revoir !")
+        sleep(1)
         sys.exit()
 
 # Fonction qui implemente la partie
@@ -472,11 +539,12 @@ def play():
         # Mode joueur contre IA
 
         elif mode=="2":
+            difficulty = input("Quel doit etre la difficulte de l'IA, facile (1), moyen (2) ou difficile (3) ?\n")
             j1 = initGridPlay()
             j2 = initGridComp()
             move1, move2 = [], []
             res1, res2 = [], []
-            run_game(mode, j1, j2, "Joueur 1", "IA", move1, move2, res1, res2)
+            run_game(mode, j1, j2, "Joueur 1", "IA", move1, move2, res1, res2, difficulty=difficulty)
 
         # Mode IA contre IA
 
@@ -488,11 +556,17 @@ def play():
                 time = float(0)
                 print("Par defaut, le temps sera de 0 sec.")
 
+            difficulty = input("Quel doit etre la difficulte de l'IA, facile (1), moyen (2) ou difficile (3) ?\n")
+
+            if difficulty not in ("1", "2", "3"):
+                print("Les arguments ne sont pas bons, recommencez")
+                return play()
+
             j1 = initGridComp()
             j2 = initGridComp()
             move1, move2 = [], []
             res1, res2 = [], []
-            run_game(mode, j1, j2, "IA 1", "IA 2", move1, move2, res1, res2, time=time)
+            run_game(mode, j1, j2, "IA 1", "IA 2", move1, move2, res1, res2, difficulty=difficulty, time=time)
 
         # Reprise de partie
 
@@ -513,14 +587,15 @@ def play():
                     res1, res2 = data[8], data[4]
                     j1, j2 = data[9], data[5]
 
-                time = data[10]
+                difficulty = data[10]
+                time = data[11]
                 mode = data[0]
 
                 if isOver(j1) or isOver(j2):
                     print("La partie est finie, recommencez-en une.")
                     return play()
 
-                run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, time=time)
+                run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=difficulty, time=time)
 
             except IndexError:
                 print("Il n'y a pas de partie a charger.")
@@ -532,6 +607,7 @@ def play():
 
     except KeyboardInterrupt:
         print("Au-revoir !")
+        sleep(1)
         sys.exit()
 
 play()
