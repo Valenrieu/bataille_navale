@@ -175,12 +175,19 @@ def playComp(move, res1, difficulty):
     ships_len = {1:5, 2:4, 3:3, 4:3, 5:2}
     last = None
     possibilities = []
+    grid = creategrid()
+
+    for i in range(len(res1)):
+            if res1[i]!=0:
+                grid[move[i][0]][move[i][1]] = res1[i]
 
     if difficulty=="1":
         res = random.randint(0, 9), random.randint(0, 9)
 
         while res in move:
             res = random.randint(0, 9), random.randint(0, 9)
+
+        return res
 
     elif difficulty=="2":
         for i in range(len(res1)):
@@ -244,6 +251,31 @@ def playComp(move, res1, difficulty):
                 res = random.randint(0, 9), random.randint(0, 9)
 
         return res
+    
+    elif difficulty=="3":
+        probas = creategrid()
+
+        for i in range(len(probas)):
+            for j in range(len(probas)):
+                for k in [2, 3, 3, 4, 5]:
+                    if validPosition(grid, i, j, 1, k):
+                        for l in range(k):
+                            probas[i][j+l] += 1
+
+                    if validPosition(grid, i, j, 2, k):
+                        for l in range(k):
+                            probas[i+l][j] += 1
+
+        max = float('-inf')
+        index = (0, 0)
+
+        for i in range(len(probas)):
+            for j in range(len(probas)):
+                if probas[i][j]>max and (i, j) not in move:
+                    max = probas[i][j]
+                    index = (i, j)
+
+        return index
 
 # Permet l'affichage de la grille si le joueur le demande, renvoie les numeros de
 # colonnes et lignes sur laquelle le joueur veut tirer, si le joueur a tire
@@ -531,7 +563,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
         init_data(mode)
         save(next, j1, move1, res1, player1, j2, move2, res2, player2, difficulty=difficulty, time=time)
         print("Au-revoir !")
-        sleep(1)
+        sleep(0.75)
         sys.exit()
 
 # Fonction qui implemente la partie
@@ -572,7 +604,7 @@ def play():
             difficulty = input("Quel doit etre la difficulte de l'IA, facile (1), moyen (2) ou difficile (3) ?\n")
 
             if difficulty not in ("1", "2", "3"):
-                print("Les arguments ne sont pas bons, recommencez")
+                print("La difficulte choisie, n'existe pas.\n")
                 return play()
 
             j1 = initGridComp()
@@ -605,22 +637,22 @@ def play():
                 mode = data[0]
 
             except IndexError:
-                print("Il n'y a pas de partie a charger.")
+                print("Il n'y a pas de partie a charger.\n")
                 return play()
 
             if isOver(j1) or isOver(j2):
-                print("La partie est finie, recommencez-en une.")
+                print("La partie est finie, recommencez-en une.\n")
                 return play()
 
             run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=difficulty, time=time)
 
         else:
-            print("Le choix n'est pas bon.")
+            print("Le choix n'est pas bon.\n")
             return play()
 
     except KeyboardInterrupt:
         print("Au-revoir !")
-        sleep(1)
+        sleep(0.75)
         sys.exit()
 
 play()
