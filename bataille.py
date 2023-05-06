@@ -167,19 +167,101 @@ def isOver(grid):
 
     return True
 
+# Permet l'acharnement de l'IA sur un bateau, genere toutes les cases ou
+# le bateau peut etre, en fonction de sa taille et eventuellement de son
+# orientation, si on l'a touche plus d'une fois.
+
+def drown(grid, move, index, last):
+    ships_len = {1:5, 2:4, 3:3, 4:3, 5:2}
+    possibilities = []
+
+    try:
+        # S'il y a le bateau en ligne 
+        if index[0] not in (0, 10) and index[1] not in (0, 10) and grid[index[0]][index[1]+1]==last or grid[index[0]][index[1]-1]==last:
+            if grid[index[0]][index[1]+1]==last and grid[move[-1][0]][move[-1][1]]==last:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0], index[1]+k) not in move and index[1]+k<10:
+                        possibilities.append((index[0], index[1]+k))
+            
+            else:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0], index[1]-k) not in move and index[1]-k>=0:
+                        possibilities.append((index[0], index[1]-k))
+
+            if len(possibilities)==0:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0], index[1]-k) not in move and index[1]-k>=0:
+                        possibilities.append((index[0], index[1]-k))
+
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0], index[1]+k) not in move and index[1]+k<10:
+                        possibilities.append((index[0], index[1]+k))
+
+        # S'il est vertical
+        elif grid[index[0]+1][index[1]]==last or grid[index[0]-1][index[1]]==last and index[0]!=0 and index[0]!=10:
+            if grid[index[0]+1][index[1]]==last and grid[move[-1][0]][move[-1][1]]==last:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0]+k, index[1]) not in move and index[0]+k<10:
+                        possibilities.append((index[0]+k, index[1]))
+
+            else:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0]-k, index[1]) not in move and index[0]-k>=0:
+                        possibilities.append((index[0]-k, index[1]))
+
+            if len(possibilities)==0:
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0]-k, index[1]) not in move and index[0]-k>=0:
+                        possibilities.append((index[0]-k, index[1]))
+
+                for k in range(1, ships_len.get(last)+1):
+                    if (index[0]+k, index[1]) not in move and index[0]+k<10:
+                        possibilities.append((index[0]+k, index[1]))
+
+        else:
+            for k in range(1, ships_len.get(last)+1):
+                if (index[0], index[1]+k) not in move and index[1]+k<10:
+                    possibilities.append((index[0], index[1]+k))
+
+                if (index[0], index[1]-k) not in move and index[1]-k>=0:
+                    possibilities.append((index[0], index[1]-k))
+
+                if (index[0]+k, index[1]) not in move and index[0]+k<10:
+                    possibilities.append((index[0]+k, index[1]))
+
+                if (index[0]-k, index[1]) not in move and index[0]-k>=0:
+                    possibilities.append((index[0]-k, index[1]))
+
+    except IndexError:
+        for k in range(1, ships_len.get(last)+1):
+            if (index[0], index[1]+k) not in move and index[1]+k<10:
+                possibilities.append((index[0], index[1]+k))
+
+            if (index[0], index[1]-k) not in move and index[1]-k>=0:
+                possibilities.append((index[0], index[1]-k))
+
+            if (index[0]+k, index[1]) not in move and index[0]+k<10:
+                possibilities.append((index[0]+k, index[1]))
+
+            if (index[0]-k, index[1]) not in move and index[0]-k>=0:
+                possibilities.append((index[0]-k, index[1]))
+
+    return possibilities[0]
+
 # Implemente l'IA, renvoie un tuple de deux entiers entre 0 et 9
 # Prend en argument l'historique des mouvements (liste) et les resultats
-# correspondants, aussi une liste
+# correspondants, aussi une liste et la difficulte ("1", "2", ou "3").
+# Difficulte 1 : totalement aleatoire
+# Difficulte 2 : L'IA reconstruit la grille ennemie grace a son historique
+# de tirs et de resultats, elle tire au hasard jusqu'a qu'elle touche un bateau
+# puis elle s'acharne ensuite dessus, etc..
+# Difficulte 3 : Elle utilise une fonction d'evaluation pour choisir ses
+# coups, des qu'elle touche un bateau, elle s'acharne.
 
 def playComp(move, res1, difficulty):
     ships_len = {1:5, 2:4, 3:3, 4:3, 5:2}
     last = None
-    possibilities = []
     grid = creategrid()
-
-    for i in range(len(res1)):
-            if res1[i]!=0:
-                grid[move[i][0]][move[i][1]] = res1[i]
 
     if difficulty=="1":
         res = random.randint(0, 9), random.randint(0, 9)
@@ -192,57 +274,18 @@ def playComp(move, res1, difficulty):
     elif difficulty=="2":
         for i in range(len(res1)):
             if res1[i]!=0:
+                grid[move[i][0]][move[i][1]] = res1[i]
+
+            else:
+                grid[move[i][0]][move[i][1]] = 7
+
+        for i in range(len(res1)):
+            if res1[i]!=0:
                 last = res1[i]
-                index = i
+                index = move[i]
 
                 if res1.count(last)!=ships_len.get(last):
-                    if res1[-1]!=last:
-                        for j in range(1, ships_len.get(last)+1):
-                            if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
-                                possibilities.append((move[index][0]+j, move[index][1]))
-
-                            if move[index][0]-j>=0 and (move[index][0]-j, move[index][1]) not in move:
-                                possibilities.append((move[index][0]-j, move[index][1]))
-
-                            if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
-                                possibilities.append((move[index][0], move[index][1]+j))
-
-                            if move[index][1]-j>=0 and (move[index][0], move[index][1]-j) not in move:
-                                possibilities.append((move[index][0], move[index][1]-j))
-
-                    else:
-                        # Si les coups sont sur la meme colonne
-                        if move[index][0]!=move[-1][0]:
-                            for j in range(1, ships_len.get(last)+1):
-                                if move[-1][0]>move[index][0] or move[-2][0]>move[index][0]:
-                                    if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
-                                        possibilities.append((move[index][0]+j, move[index][1]))
-
-                            for j in range(1, ships_len.get(last)+1):
-                                if move[index][0]-j>=0 and (move[index][0]-j, move[index][1]) not in move:
-                                    possibilities.append((move[index][0]-j, move[index][1]))
-
-                            if len(possibilities)==0:
-                                for j in range(1, ships_len.get(last)+1):
-                                    if move[index][0]+j<10 and (move[index][0]+j, move[index][1]) not in move:
-                                        possibilities.append((move[index][0]+j, move[index][1]))
-
-                        else:
-                            for j in range(1, ships_len.get(last)+1):
-                                if move[-1][1]>move[index][1]:
-                                    if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
-                                        possibilities.append((move[index][0], move[index][1]+j))
-
-                            for j in range(1, ships_len.get(last)+1):
-                                if move[index][1]-j>=0 and (move[index][0], move[index][1]-j) not in move:
-                                    possibilities.append((move[index][0], move[index][1]-j))
-
-                            if len(possibilities)==0:
-                                for j in range(1, ships_len.get(last)+1):
-                                    if move[index][1]+j<10 and (move[index][0], move[index][1]+j) not in move:
-                                        possibilities.append((move[index][0], move[index][1]+j))
-
-                    return possibilities[0]
+                    return drown(grid, move, index, last)
 
         if last is None or res1.count(last)==ships_len.get(last):
             res = random.randint(0, 9), random.randint(0, 9)
@@ -253,29 +296,48 @@ def playComp(move, res1, difficulty):
         return res
     
     elif difficulty=="3":
-        probas = creategrid()
+        for i in range(len(res1)):
+            if res1[i]!=0:
+                grid[move[i][0]][move[i][1]] = res1[i]
 
-        for i in range(len(probas)):
-            for j in range(len(probas)):
-                for k in [2, 3, 3, 4, 5]:
-                    if validPosition(grid, i, j, 1, k):
-                        for l in range(k):
-                            probas[i][j+l] += 1
+            else:
+                # On met un 7, pour les coups rates, quand il va verifier
+                # si la position est valide ou non, et qu'il y a un 7,
+                # il saura que non
+                grid[move[i][0]][move[i][1]] = 7
 
-                    if validPosition(grid, i, j, 2, k):
-                        for l in range(k):
-                            probas[i+l][j] += 1
+        for i in range(len(res1)):
+            if res1[i]!=0:
+                last = res1[i]
+                index = move[i]
 
-        max = float('-inf')
-        index = (0, 0)
+                if res1.count(last)!=ships_len.get(last):
+                    return drown(grid, move, index, last)
 
-        for i in range(len(probas)):
-            for j in range(len(probas)):
-                if probas[i][j]>max and (i, j) not in move:
-                    max = probas[i][j]
-                    index = (i, j)
+        if last is None or res1.count(last)==ships_len.get(last):
+            score = creategrid()
 
-        return index
+            for i in range(len(score)):
+                for j in range(len(score)):
+                    for k in [2, 3, 3, 4, 5]:
+                        if validPosition(grid, i, j, 1, k):
+                            for l in range(k):
+                                score[i][j+l] += 1
+
+                        if validPosition(grid, i, j, 2, k):
+                            for l in range(k):
+                                score[i+l][j] += 1
+
+            max = float('-inf')
+            index = (0, 0)
+
+            for i in range(len(score)):
+                for j in range(len(score)):
+                    if score[i][j]>max and (i, j) not in move:
+                        max = score[i][j]
+                        index = (i, j)
+            printGrid(score)
+            return index
 
 # Permet l'affichage de la grille si le joueur le demande, renvoie les numeros de
 # colonnes et lignes sur laquelle le joueur veut tirer, si le joueur a tire
@@ -443,6 +505,7 @@ def load():
         pass
 
     file.close()
+
     return mode, next, player1, move1, res1, grid1, player2, move2, res2, grid2, difficulty, time
 
 # Fonction qui permet le deroulement de la partie, permet de sauvegarder 
@@ -516,7 +579,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 print("L'IA a joue :")
                 move = playComp(move2, res2, difficulty)
 
-                print(letters.get(move[1]), move[0], sep="")
+                print(letters.get(move[1]), move[0]+1, sep="")
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
@@ -535,7 +598,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 print("L'"+player1+" a joue :")
                 move = playComp(move1, res1, difficulty)
 
-                print(letters.get(move[1]), move[0], sep="")
+                print(letters.get(move[1]), move[0]+1, sep="")
                 j2, last1 = oneMove(j2, move[0], move[1])
                 move1.append(move)
                 res1.append(last1)
@@ -549,7 +612,7 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 next = player1
                 print("L'"+player2+" a joue :")
                 move = playComp(move2, res2, difficulty)
-                print(letters.get(move[1]), move[0], sep="")
+                print(letters.get(move[1]), move[0]+1, sep="")
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
