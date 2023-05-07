@@ -23,7 +23,7 @@ def cipher(mess, key):
     res = ""
 
     if len(mess)>len(key):
-        raise ValueError("Key's length must be equal to message's length.")
+        raise ValueError("Key's length must be greater or equal to message's length.")
 
     for i in range(len(mess)):
         if mess[i]=="\n":
@@ -37,8 +37,11 @@ def cipher(mess, key):
 
     return res
 
-# Permet de dechiffrer, ne connait pas la cle, il la cherche avec la liste
-# des cles et le hache de la cle utilise, qui est stocke dans 'cipher.txt'.
+# Permet de dechiffrer, la fonction ne prend pas de cle en parametre, dans
+# notre cas, a chaque sauvegarde on va chiffrer les donnees, en utilisant
+# la fonction 'cipher', celle-ci va ecrire le hache sha-256 de la cle utilisee
+# dans 'cipher.txt'. Cette fonction va utiliser la table de hachage pour trouver
+# a quelle cle correspond ce hache et va dechiffrer ensuite.
 
 def decipher(mess):
     global index
