@@ -256,8 +256,9 @@ def drown(grid, move, index, last):
 # Difficulte 2 : L'IA reconstruit la grille ennemie grace a son historique
 # de tirs et de resultats, elle tire au hasard jusqu'a qu'elle touche un bateau
 # puis elle s'acharne ensuite dessus, etc..
-# Difficulte 3 : Elle utilise une fonction d'evaluation pour choisir ses
-# coups, des qu'elle touche un bateau, elle s'acharne.
+# Difficulte 3 : Elle reconstruit aussi la grille adverse, puis utilise une
+# fonction d'evaluation pour choisir ses coups, des qu'elle touche un
+# bateau, elle s'acharne.
 
 def playComp(move, res1, difficulty):
     ships_len = {1:5, 2:4, 3:3, 4:3, 5:2}
