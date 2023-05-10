@@ -461,8 +461,7 @@ def load():
     time = None
     difficulty = None
 
-    with open("game_data.txt", "r") as file:
-        data = file.readlines()
+    with open("game_data.txt", "r") as data:
         res = ""
 
         for i in data:

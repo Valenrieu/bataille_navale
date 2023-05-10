@@ -14,9 +14,9 @@ with open("keys.txt", "w") as file:
             res += alphabet[random.randint(0, len(alphabet)-1)]
 
         if i==199:
-            file.write('"'+res+'":"'+hashlib.sha256(res.encode()).hexdigest()+'"\n\t\t')
+            file.write('"'+res+'":"'+hashlib.sha256(res.encode()).hexdigest()+'"\n        ')
             break
 
-        file.write('"'+res+'":"'+hashlib.sha256(res.encode()).hexdigest()+'",\n\t\t')
+        file.write('"'+res+'":"'+hashlib.sha256(res.encode()).hexdigest()+'",\n        ')
 
     file.write("}")
