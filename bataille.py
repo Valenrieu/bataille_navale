@@ -462,13 +462,10 @@ def load():
     difficulty = None
 
     with open("game_data.txt", "r") as data:
-        res = ""
+        res = data.read()
 
-        for i in data:
-            res += i
-
-        data = vernam.decipher(res)
-        data = data.split("\n")
+    data = vernam.decipher(res)
+    data = data.split("\n")
 
     player1, player2 = data[2], data[15]
     mode = data[0]
