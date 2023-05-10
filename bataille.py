@@ -461,8 +461,8 @@ def load():
     time = None
     difficulty = None
 
-    with open("game_data.txt", "r") as data:
-        res = data.read()
+    with open("game_data.txt", "r") as file:
+        res = file.read()
 
     data = vernam.decipher(res)
     data = data.split("\n")
@@ -470,7 +470,7 @@ def load():
     player1, player2 = data[2], data[15]
     mode = data[0]
     next = data[1]
-    
+
     for i in range(0, len(data[3]), 3):
         move1.append((int(data[3][i]), int(data[3][i+1])))
 
