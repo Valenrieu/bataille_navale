@@ -1,3 +1,5 @@
+# Fichier qui a servi a generer mes cles et les haches
+
 import random
 import string
 import hashlib

@@ -4,6 +4,15 @@ import sys
 import vernam
 from time import sleep
 
+try:
+    from art import text2art
+    from consolemenu import *
+    from consolemenu.items import *
+
+except ImportError:
+    print("Le programme a besoin des modules text2art et consolemenu : 'pip install console-menu' 'pip install art'")
+    sys.exit()
+
 # Renvoie une grille 10x10 sous forme de liste de listes
 
 def creategrid():
@@ -138,8 +147,8 @@ def hasDrowned(grid, num):
 # a chaque tour. Renvoie la grille et le numero du bateau touche 0 sinon
 
 def oneMove(grid, line, col):
-    ships = {1:"Porte-avions", 2:"Croiseur", 3:"Contre-torpilleur", 4:"Sous-marin",
-            5:"Torpilleur"}
+    ships = {1:"Porte-avions", 2:"Croiseur", 3:"Contre-torpilleur",
+             4:"Sous-marin", 5:"Torpilleur"}
 
     if grid[line][col]==0:
         print("A l'eau\n")
@@ -396,7 +405,8 @@ def playPlayer(grid1, grid2, move1):
 # 18 les resultats du joueur 2 19 a 28 : la grille de j2, eventuellement 28, 29
 # la difficulte et le temps de reponse des IA
 
-def save(next, grid1, move1, res1, player1, grid2, move2, res2, player2, mode, difficulty=None, time=None):
+def save(next, grid1, move1, res1, player1, grid2, move2, res2, player2,
+         mode, difficulty=None, time=None):
     key = vernam.random_key()
 
     open("game_data.txt", "w").close()
@@ -513,8 +523,10 @@ def load():
 # automatiquement la partie si l'utilisateur fait CTRL+C, s'il quitte
 # sans faire CTRL+C, il n'y aura pas de sauvegarde
 
-def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=None, time=None):
-    letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J"}
+def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2,
+             difficulty=None, time=None):
+    letters = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H",
+               8:"I", 9:"J"}
     next = player1
 
     try:
@@ -551,10 +563,6 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 res2.append(last2)
                 next = player1
 
-            print(win+" a gagne !")
-            print("Au-revoir")
-            sleep(1)
-
         # Mode JcIA
 
         elif mode=="2":
@@ -576,6 +584,8 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                     win = player1
                     break
 
+                sleep(time)
+
                 next = player1
                 print("L'IA a joue :")
                 move = playComp(move2, res2, difficulty)
@@ -584,10 +594,6 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 j1, last2 = oneMove(j1, move[0], move[1])
                 move2.append(move)
                 res2.append(last2)
-
-            print(win+" a gagne !")
-            print("Au-revoir")
-            sleep(1)
 
         # Mode IAcIA
 
@@ -619,21 +625,23 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficult
                 res2.append(last2)
                 sleep(time)
 
-            print(win+" a gagne !")
-            print("Au-revoir")
-            sleep(1)
+        c_menu = SelectionMenu(title=text2art(win+" a gagne !"),
+                               strings=["Retourner au menu principal"],
+                               show_exit_option=False)
+        c_menu.show()
+        c_menu.exit()
+        return menu()
 
     except KeyboardInterrupt:
-        save(next, j1, move1, res1, player1, j2, move2, res2, player2, mode, difficulty=difficulty, time=time)
+        save(next, j1, move1, res1, player1, j2, move2, res2, player2,
+             mode, difficulty=difficulty, time=time)
         print("Au-revoir !")
         sys.exit()
 
 # Fonction qui implemente la partie
 
-def play():
+def play(mode):
     try:
-        mode = input("** Bienvenue, choisissez votre mode de jeu : **\n1 : joueur contre joueur\n2 : Joueur contre IA\n3 : IA contre IA\n4 : Reprendre la partie precedente\n")
-
         # Mode joueur contre joueur
 
         if mode=="1":
@@ -641,39 +649,110 @@ def play():
             j2 = initGridPlay()
             move1, move2 = [], []
             res1, res2 = [], []
-            run_game(mode, j1, j2, "JOUEUR 1", "JOUEUR 2", move1, move2, res1, res2)
+            run_game(mode, j1, j2, "JOUEUR 1", "JOUEUR 2", move1, move2,
+                     res1, res2)
 
         # Mode joueur contre IA
 
         elif mode=="2":
-            difficulty = input("Quel doit etre la difficulte de l'IA, facile (1), moyen (2) ou difficile (3) ?\n")
+            time = 0
+            difficulty = "3"
+            strings = ["Choix du temps de reponse de l'IA (defaut 0 sec)",
+                       "Choix de la difficulte de l'IA (defaut difficile)",
+                       "Lancer la partie",
+                       "Retourner au menu principal"]
+            c_menu = SelectionMenu(strings=strings, title="Initialisation de la partie",
+                                   show_exit_option=False)
+            c_menu.show()
+            choice = c_menu.selected_option
+
+            while choice!=2 and choice!=3:
+                if choice==1:
+                    z_menu = SelectionMenu(strings=["Facile", "Moyen", "Difficile", "Retour au menu d'initialisation"],
+                                           show_exit_option=False)
+                    z_menu.show()
+                    difficulty = str(z_menu.selected_option+1)
+                    z_menu.exit()
+
+                    if difficulty==3:
+                        return play(mode)
+
+                c_menu.show()
+                choice = c_menu.selected_option
+
+                if choice==0:
+                    try:
+                        time = float(input("Quel doit etre le temps de reponse de l'IA en sec\n"))
+
+                    except ValueError:
+                        print("\nPar defaut le temps sera de 0 sec.")
+                        time = 0
+
+                    c_menu.show()
+                    choice = c_menu.selected_option
+
+            if choice==3:
+                c_menu.exit()
+                return menu()
+
+            c_menu.exit()
             j1 = initGridPlay()
             j2 = initGridComp()
             move1, move2 = [], []
             res1, res2 = [], []
-            run_game(mode, j1, j2, "JOUEUR 1", "IA", move1, move2, res1, res2, difficulty=difficulty)
+            run_game(mode, j1, j2, "JOUEUR 1", "IA", move1, move2, res1,
+                     res2, difficulty=difficulty, time=time)
 
         # Mode IA contre IA
 
         elif mode=="3":
-            try:
-                time = float(input("Quel doit etre le temps en secondes entre chaque action de l'IA ?\n"))
+            time = 0.5
+            difficulty = "3"
+            selections = ["Choix du temps de reponse des IA (defaut 0.5 sec)",
+                          "Choix de la difficulte (defaut difficile)",
+                          "Lancer la partie",
+                          "Retour au menu principal"]
+            c_menu = SelectionMenu(title="Initialisation de la partie",
+                                 strings=selections, show_exit_option=False)
+            c_menu.show()
+            choice = c_menu.selected_option
 
-            except ValueError:
-                time = float(0)
-                print("Par defaut, le temps sera de 0 sec.")
+            while choice!=2 and choice!=3:
+                if choice==0:
+                    try:
+                        time = float(input("Quel doit etre le temps en secondes entre chaque action de l'IA ?\n"))
 
-            difficulty = input("Quel doit etre la difficulte de l'IA, facile (1), moyen (2) ou difficile (3) ?\n")
+                    except ValueError:
+                        time = float(0)
+                        print("Par defaut, le temps sera de 0 sec.")
 
-            if difficulty not in ("1", "2", "3"):
-                print("La difficulte choisie, n'existe pas.\n")
-                return play()
+                    c_menu.show()
+                    choice = c_menu.selected_option
 
+                if choice==1:
+                    z_menu = SelectionMenu(strings=["Facile", "Moyen", "Difficile", "Retour au menu d'initialisation"],
+                                           show_exit_option=False)
+                    z_menu.show()
+                    difficulty = str(z_menu.selected_option+1)
+                    z_menu.exit()
+
+                    if difficulty==3:
+                        return play(mode)
+
+                    c_menu.show()
+                    choice = c_menu.selected_option
+
+            if choice==3:
+                c_menu.exit()
+                return menu()
+            
+            c_menu.exit()
             j1 = initGridComp()
             j2 = initGridComp()
             move1, move2 = [], []
             res1, res2 = [], []
-            run_game(mode, j1, j2, "IA 1", "IA 2", move1, move2, res1, res2, difficulty=difficulty, time=time)
+            run_game(mode, j1, j2, "IA 1", "IA 2", move1, move2, res1,
+                     res2, difficulty=difficulty, time=time)
 
         # Reprise de partie
 
@@ -699,22 +778,48 @@ def play():
                 mode = data[0]
 
             except IndexError:
-                print("Il n'y a pas de partie a charger.\n")
-                return play()
+                c_menu = SelectionMenu(strings=["Retourner au menu principal"],
+                                       title = "Il n'y a pas de partie a charger",
+                                       show_exit_option=False)
+                c_menu.show()
+                c_menu.exit()
+                return menu()
 
             if isOver(j1) or isOver(j2):
-                print("La partie est finie, recommencez-en une.\n")
-                return play()
+                c_menu = SelectionMenu(strings=["Retourner au menu principal"],
+                                       title = "La partie est finie, recommencez-en une",
+                                       show_exit_option=False)
+                c_menu.show()
+                c_menu.exit()
+                return menu()
 
-            print("")
-            run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2, difficulty=difficulty, time=time)
-
-        else:
-            print("Le choix n'est pas bon.\n")
-            return play()
+            run_game(mode, j1, j2, player1, player2, move1, move2, res1,
+                     res2, difficulty=difficulty, time=time)
 
     except KeyboardInterrupt:
         print("Au-revoir !")
         sys.exit()
 
-play()
+# Fonction qui implemente le menu grace a consolemenu
+
+def menu():
+    try:
+        choices = ["Joueur contre joueur", "Joueur contre IA",
+                   "IA contre IA", "Reprendre la partie precedente"]
+
+        menu = SelectionMenu(strings=choices, title=text2art("Bataille navale", font="cybermedium"),
+                             subtitle="Bienvenue, choisissez votre mode de jeu. Faites CTRL+C a tout moment de la partie pour sauvegarder et quitter.",
+                             show_exit_option=False)
+        end = ExitItem(text="Quitter", menu_char="q")
+        menu.append_item(end)
+        menu.show()
+        choice = menu.selected_option
+        menu.exit()
+        if choice != 4:
+            return play(str(choice+1))
+
+    except KeyboardInterrupt:
+        print("Au-revoir !")
+        sys.exit()
+
+menu()
