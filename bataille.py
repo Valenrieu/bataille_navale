@@ -6,11 +6,11 @@ from time import sleep
 
 try:
     from art import text2art
-    from consolemenu import *
-    from consolemenu.items import *
+    from consolemenu import SelectionMenu
+    from consolemenu.items import ExitItem
 
 except ImportError:
-    print("Le programme a besoin des modules text2art et consolemenu : 'pip install console-menu' 'pip install art'")
+    print("Le programme a besoin des modules art et consolemenu : 'pip install console-menu' 'pip install art'")
     sys.exit()
 
 # Renvoie une grille 10x10 sous forme de liste de listes
@@ -305,7 +305,7 @@ def playComp(move, res1, difficulty):
                 res = random.randint(0, 9), random.randint(0, 9)
 
         return res
-    
+
     elif difficulty=="3":
         for i in range(len(res1)):
             if res1[i]!=0:
@@ -625,9 +625,10 @@ def run_game(mode, j1, j2, player1, player2, move1, move2, res1, res2,
                 res2.append(last2)
                 sleep(time)
 
-        c_menu = SelectionMenu(title=text2art(win+" a gagne !"),
+        c_menu = SelectionMenu(title=text2art(win+" a gagne !", font="mini"),
                                strings=["Retourner au menu principal"],
                                show_exit_option=False)
+        sleep(1.5)
         c_menu.show()
         c_menu.exit()
         return menu()
