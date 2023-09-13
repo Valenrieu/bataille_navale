@@ -18,9 +18,6 @@ letters = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'F', 6: 'G', 7: 'H',
 # utilise les lettres majuscules, les chiffres, l'espace et le point.
 
 def cipher(mess, key):
-    global index
-    global letters
-    global keys
     res = ""
 
     if len(mess)>len(key):
@@ -45,9 +42,6 @@ def cipher(mess, key):
 # a quelle cle correspond ce hache et va dechiffrer ensuite.
 
 def decipher(mess):
-    global index
-    global letters
-    global keys
     res = ""
 
     with open("cipher.txt", "r") as file:
@@ -70,7 +64,6 @@ def decipher(mess):
 # Renvoie une cle aleatoire dans le dictionnaire
 
 def random_key():
-    global keys
     index = random.randint(0, len(keys)-1)
     count = 0
 
