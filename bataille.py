@@ -9,7 +9,7 @@ try:
     from consolemenu import SelectionMenu
     from consolemenu.items import ExitItem
 
-except ImportError:
+except ImportError, ModuleNotFoundError:
     print("Le programme a besoin des modules art et consolemenu : 'pip install console-menu' 'pip install art'")
     sys.exit()
 
@@ -823,4 +823,5 @@ def menu():
         print("Au-revoir !")
         sys.exit()
 
-menu()
+if __name__=="__main__":
+    menu()
